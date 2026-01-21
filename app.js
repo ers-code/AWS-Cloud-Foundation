@@ -125,7 +125,7 @@ function loadPDFRoot() {
 
 function loadTutorials() {
     sectionTitle.textContent = "Tutorials";
-    currentPath = "tutorials";
+    currentPath = "PDFs";
     searchInput.value = "";
-    fetchContents("tutorials");
+    fetchContents("PDFs");
 }
