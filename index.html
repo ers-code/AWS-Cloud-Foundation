@@ -3,27 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <title>AWS Cloud Foundation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="dashboard">
 
+    <!-- SIDEBAR -->
     <aside class="sidebar">
-        <h2>AWS Cloud Foundation</h2>
-        <ul>
-            <li onclick="loadSection('pdfs')">PDFs</li>
-            <li onclick="loadSection('tutorials')">Tutorials</li>
-        </ul>
+        <h1>AWS Cloud<br>Foundation</h1>
+
+        <nav>
+            <button onclick="loadPDFRoot()">📘 PDFs</button>
+            <button onclick="loadTutorials()">📚 Tutorials</button>
+        </nav>
     </aside>
 
+    <!-- MAIN CONTENT -->
     <main class="content">
-        <header>
-            <h1 id="section-title">Dashboard</h1>
-            <input type="text" id="search" placeholder="Search..." onkeyup="filterItems()">
+        <header class="topbar">
+            <h2 id="section-title">Dashboard</h2>
+            <input
+                type="text"
+                id="search"
+                placeholder="Search..."
+                onkeyup="filterItems()"
+            >
         </header>
 
-        <div id="cards" class="card-grid"></div>
+        <section id="cards" class="card-grid">
+            <div class="welcome">
+                Select a section from the sidebar.
+            </div>
+        </section>
     </main>
 
 </div>
