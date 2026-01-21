@@ -44,7 +44,7 @@ function renderItems(items) {
 
         if (item.type === "dir") {
             card.innerHTML = `
-                <a>📂 ${item.name}</a>
+                <a>PDFs/01-Networking ${item.name}</a>
                 <span>Category</span>
             `;
             card.onclick = () => {
