@@ -1,101 +1,131 @@
-/* ================= CONFIG ================= */
+/* =========================================================
+   CONFIGURATION
+   ========================================================= */
 
-const GITHUB_USER = "YOUR_GITHUB_USERNAME";
+const GITHUB_USER = "ers-code"; // <-- change this
 const REPO_NAME = "AWS-Cloud-Foundation";
 const BRANCH = "main";
 
-/* ================= ELEMENTS ================= */
+/* =========================================================
+   DOM ELEMENTS
+   ========================================================= */
 
 const cards = document.getElementById("cards");
 const sectionTitle = document.getElementById("section-title");
+const searchInput = document.getElementById("search");
 
 let currentItems = [];
 let currentPath = "";
 
-/* ================= API ================= */
+/* =========================================================
+   CORE FETCH FUNCTION
+   ========================================================= */
 
 async function fetchContents(path) {
     cards.innerHTML = "Loading...";
 
-    const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`;
-    const response = await fetch(url);
-    const data = await response.json();
+    try {
+        const url = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`;
+        const response = await fetch(url);
 
-    currentItems = data;
-    renderItems(data);
+        if (!response.ok) {
+            throw new Error("GitHub API error");
+        }
+
+        const data = await response.json();
+        currentItems = data;
+        renderItems(data);
+
+    } catch (error) {
+        cards.innerHTML = "Failed to load content.";
+        console.error(error);
+    }
 }
 
-/* ================= RENDER ================= */
+/* =========================================================
+   RENDER LOGIC
+   ========================================================= */
 
 function renderItems(items) {
     cards.innerHTML = "";
 
-    if (currentPath && currentPath !== "PDFs") {
-        const back = document.createElement("div");
-        back.className = "card back-card";
-        back.innerHTML = `<a>⬅ Back</a><span>Return</span>`;
-        back.onclick = () => loadPDFRoot();
-        cards.appendChild(back);
+    // Back button (only inside category folders)
+    if (currentPath && currentPath !== "PDFs" && currentPath !== "tutorials") {
+        const backCard = document.createElement("div");
+        backCard.className = "card back-card";
+        backCard.innerHTML = `<a>⬅ Back</a><span>Return to categories</span>`;
+        backCard.onclick = () => loadPDFRoot();
+        cards.appendChild(backCard);
     }
 
     items.forEach(item => {
         const card = document.createElement("div");
         card.className = "card";
 
+        /* ---------- FOLDER (CATEGORY) ---------- */
         if (item.type === "dir") {
             card.innerHTML = `
-                <a>PDFs/01-Networking ${item.name}</a>
+                <a>📂 ${item.name}</a>
                 <span>Category</span>
             `;
             card.onclick = () => {
                 currentPath = item.path;
                 sectionTitle.textContent = item.name;
+                searchInput.value = "";
                 fetchContents(item.path);
             };
+            cards.appendChild(card);
         }
 
-        if (item.type === "file" && item.name.endsWith(".pdf")) {
+        /* ---------- PDF FILES ONLY ---------- */
+        if (
+            item.type === "file" &&
+            item.name.toLowerCase().endsWith(".pdf")
+        ) {
             card.innerHTML = `
                 <a href="${item.download_url}" target="_blank">
                     📄 ${item.name}
                 </a>
                 <span>PDF</span>
             `;
+            cards.appendChild(card);
         }
-
-        if (item.type === "file" && !item.name.endsWith(".pdf")) {
-            card.innerHTML = `
-                <a href="${item.html_url}" target="_blank">
-                    📘 ${item.name}
-                </a>
-                <span>Tutorial</span>
-            `;
-        }
-
-        cards.appendChild(card);
     });
+
+    // Empty folder safety
+    if (cards.children.length === 0) {
+        cards.innerHTML = "<div class='welcome'>No documents found.</div>";
+    }
 }
 
-/* ================= SEARCH ================= */
+/* =========================================================
+   SEARCH
+   ========================================================= */
 
 function filterItems() {
-    const value = document.getElementById("search").value.toLowerCase();
+    const query = searchInput.value.toLowerCase();
+
     const filtered = currentItems.filter(item =>
-        item.name.toLowerCase().includes(value)
+        item.name.toLowerCase().includes(query)
     );
+
     renderItems(filtered);
 }
 
-/* ================= LOADERS ================= */
+/* =========================================================
+   LOADERS
+   ========================================================= */
 
 function loadPDFRoot() {
     sectionTitle.textContent = "PDF Categories";
     currentPath = "PDFs";
+    searchInput.value = "";
     fetchContents("PDFs");
 }
 
 function loadTutorials() {
     sectionTitle.textContent = "Tutorials";
     currentPath = "tutorials";
+    searchInput.value = "";
     fetchContents("tutorials");
 }
